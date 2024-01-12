@@ -20,6 +20,35 @@ void initialize(struct line *ln, Vector2 position) {
     ln->move_end = false;
 }
 
+void update(struct line *ln, Vector2 mouse_position) {
+    if (CheckCollisionPointCircle(mouse_position, ln->start, 10.0f) && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    {
+        ln->move_start = true;
+    }
+    else if (CheckCollisionPointCircle(mouse_position, ln->end, 10.0f) && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    {
+        ln->move_end = true;
+    }
+
+    if (ln->move_start)
+    {
+        ln->start = mouse_position;
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+        {
+            ln->move_start = false;
+        }
+    }
+
+    if (ln->move_end)
+    {
+        ln->end = mouse_position;
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+        {
+            ln->move_end = false;
+        }
+    }
+}
+
 void draw_line(struct line *ln, Vector2 mouse) {
     DrawLineBezier(ln->start, ln->end, 5.0f, BLACK);
 
@@ -36,51 +65,37 @@ void draw_line(struct line *ln, Vector2 mouse) {
 
 int main(void)
 {
+    // INITIALIZE
     InitWindow(screen_width, screen_height, "yume");
 
     struct line new_line;
+    struct line new_line2;
 
     Vector2 coor = {64, 64};
+    Vector2 coor2 = {128, 128};
+
     initialize(&new_line, coor);
+    initialize(&new_line2, coor2);
 
     SetTargetFPS(60);
 
     while (!WindowShouldClose())
     {
+        // UPDATE
         Vector2 mouse_position = GetMousePosition();
 
-        if (CheckCollisionPointCircle(mouse_position, new_line.start, 10.0f) && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
-            new_line.move_start = true;
-        }
-        else if (CheckCollisionPointCircle(mouse_position, new_line.end, 10.0f) && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-        {
-            new_line.move_end = true;
-        }
+        new_line.end = new_line2.start;
 
-        if (new_line.move_start)
-        {
-            new_line.start = mouse_position;
-            if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-            {
-                new_line.move_start = false;
-            }
-        }
+        update(&new_line, mouse_position);
+        update(&new_line2, mouse_position);
 
-        if (new_line.move_end)
-        {
-            new_line.end = mouse_position;
-            if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-            {
-                new_line.move_end = false;
-            }
-        }
-
+        // DRAW
         BeginDrawing();
 
         ClearBackground(RAYWHITE);
 
         draw_line(&new_line, mouse_position);
+        draw_line(&new_line2, mouse_position);
 
         EndDrawing();
     }
